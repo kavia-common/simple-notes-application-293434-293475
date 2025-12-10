@@ -18,7 +18,8 @@ function useNotes() {
       const raw = localStorage.getItem(LS_KEY);
       const parsed = JSON.parse(raw || '[]');
       return Array.isArray(parsed) ? parsed : [];
-    } catch {
+    } catch (error) {
+      // If localStorage is unavailable or data is corrupted, start with empty array
       return [];
     }
   });
@@ -26,7 +27,10 @@ function useNotes() {
   useEffect(() => {
     try {
       localStorage.setItem(LS_KEY, JSON.stringify(notes));
-    } catch {}
+    } catch (error) {
+      // Silently fail if localStorage is full or unavailable
+      // In production, this could trigger a user notification
+    }
   }, [notes]);
 
   // PUBLIC_INTERFACE
@@ -55,7 +59,6 @@ function useNotes() {
 
   return {
     notes,
-    setNotes,
     createNote,
     updateNote,
     deleteNote,
