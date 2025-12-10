@@ -19,6 +19,10 @@ function useNotes() {
       const parsed = JSON.parse(raw || "[]");
       return Array.isArray(parsed) ? parsed : [];
     } catch (error) {
+      if (process.env.NODE_ENV !== "production") {
+        // Surface issues in development to help debugging
+        console.warn("Failed to read notes from localStorage:", error);
+      }
       // If localStorage is unavailable or data is corrupted, start with empty array
       return [];
     }
@@ -28,6 +32,9 @@ function useNotes() {
     try {
       localStorage.setItem(LS_KEY, JSON.stringify(notes));
     } catch (error) {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("Failed to write notes to localStorage:", error);
+      }
       // Silently fail if localStorage is full or unavailable
       // In production, this could trigger a user notification
     }
@@ -119,30 +126,37 @@ function NotesList({ notes, selectedId, onSelect, onDelete }) {
     );
   }
   return (
-    <ul className="notes-list">
-      {notes.map((n) => (
-        <li
-          key={n.id}
-          className={`note-item ${selectedId === n.id ? "active" : ""}`}
-        >
-          <button
-            className="note-button"
-            onClick={() => onSelect(n.id)}
-            aria-label={`Open note ${n.title || "Untitled"}`}
+    <ul className="notes-list" role="listbox" aria-label="Notes">
+      {notes.map((n) => {
+        const isActive = selectedId === n.id;
+        return (
+          <li
+            key={n.id}
+            className={`note-item ${isActive ? "active" : ""}`}
+            role="option"
+            aria-selected={isActive}
           >
-            <div className="note-title">{n.title || "Untitled"}</div>
-            <div className="note-snippet">{(n.content || "").slice(0, 80)}</div>
-          </button>
-          <button
-            className="icon-button danger"
-            onClick={() => onDelete(n.id)}
-            aria-label={`Delete note ${n.title || "Untitled"}`}
-            title="Delete note"
-          >
-            🗑️
-          </button>
-        </li>
-      ))}
+            <button
+              className="note-button"
+              onClick={() => onSelect(n.id)}
+              aria-label={`Open note ${n.title || "Untitled"}`}
+            >
+              <div className="note-title">{n.title || "Untitled"}</div>
+              <div className="note-snippet">
+                {(n.content || "").slice(0, 80)}
+              </div>
+            </button>
+            <button
+              className="icon-button danger"
+              onClick={() => onDelete(n.id)}
+              aria-label={`Delete note ${n.title || "Untitled"}`}
+              title="Delete note"
+            >
+              🗑️
+            </button>
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -198,9 +212,22 @@ function NoteEditor({
 
 // PUBLIC_INTERFACE
 function App() {
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState(() => {
+    try {
+      const saved = localStorage.getItem("notes-app:theme");
+      return saved || "light";
+    } catch {
+      return "light";
+    }
+  });
+
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
+    try {
+      localStorage.setItem("notes-app:theme", theme);
+    } catch {
+      // ignore theme persistence failures
+    }
   }, [theme]);
 
   // Notes logic
@@ -257,9 +284,10 @@ function App() {
   const handleDeleteNote = (id) => {
     deleteNote(id);
     if (selectedId === id) {
-      setSelectedId(filteredNotes[0]?.id || null);
-      setTitleDraft(filteredNotes[0]?.title || "");
-      setContentDraft(filteredNotes[0]?.content || "");
+      const next = filteredNotes[0];
+      setSelectedId(next?.id || null);
+      setTitleDraft(next?.title || "");
+      setContentDraft(next?.content || "");
     }
   };
 
