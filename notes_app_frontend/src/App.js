@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import "./App.css";
 
 /**
  * Note shape
  * @typedef {{ id: string, title: string, content: string, updatedAt: number }} Note
  */
 
-const LS_KEY = 'notes-app:notes';
+const LS_KEY = "notes-app:notes";
 
 /**
  * Custom hook for notes CRUD in localStorage
@@ -16,7 +16,7 @@ function useNotes() {
   const [notes, setNotes] = useState(() => {
     try {
       const raw = localStorage.getItem(LS_KEY);
-      const parsed = JSON.parse(raw || '[]');
+      const parsed = JSON.parse(raw || "[]");
       return Array.isArray(parsed) ? parsed : [];
     } catch (error) {
       // If localStorage is unavailable or data is corrupted, start with empty array
@@ -34,7 +34,7 @@ function useNotes() {
   }, [notes]);
 
   // PUBLIC_INTERFACE
-  const createNote = (title = 'Untitled', content = '') => {
+  const createNote = (title = "Untitled", content = "") => {
     const id = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
     const newNote = { id, title, content, updatedAt: Date.now() };
     setNotes((prev) => [newNote, ...prev]);
@@ -45,10 +45,8 @@ function useNotes() {
   const updateNote = (id, updates) => {
     setNotes((prev) =>
       prev.map((n) =>
-        n.id === id
-          ? { ...n, ...updates, updatedAt: Date.now() }
-          : n
-      )
+        n.id === id ? { ...n, ...updates, updatedAt: Date.now() } : n,
+      ),
     );
   };
 
@@ -100,9 +98,9 @@ function AppHeader({ query, setQuery, onNewNote, theme, onToggleTheme }) {
         <button
           className="theme-toggle"
           onClick={onToggleTheme}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
         >
-          {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
+          {theme === "light" ? "🌙 Dark" : "☀️ Light"}
         </button>
       </div>
     </header>
@@ -125,22 +123,20 @@ function NotesList({ notes, selectedId, onSelect, onDelete }) {
       {notes.map((n) => (
         <li
           key={n.id}
-          className={`note-item ${selectedId === n.id ? 'active' : ''}`}
+          className={`note-item ${selectedId === n.id ? "active" : ""}`}
         >
           <button
             className="note-button"
             onClick={() => onSelect(n.id)}
-            aria-label={`Open note ${n.title || 'Untitled'}`}
+            aria-label={`Open note ${n.title || "Untitled"}`}
           >
-            <div className="note-title">{n.title || 'Untitled'}</div>
-            <div className="note-snippet">
-              {(n.content || '').slice(0, 80)}
-            </div>
+            <div className="note-title">{n.title || "Untitled"}</div>
+            <div className="note-snippet">{(n.content || "").slice(0, 80)}</div>
           </button>
           <button
             className="icon-button danger"
             onClick={() => onDelete(n.id)}
-            aria-label={`Delete note ${n.title || 'Untitled'}`}
+            aria-label={`Delete note ${n.title || "Untitled"}`}
             title="Delete note"
           >
             🗑️
@@ -164,11 +160,14 @@ function NoteEditor({
 }) {
   if (!selected) {
     return (
-      <div className="placeholder" style={{ padding: '32px', textAlign: 'center', color: '#64748b' }}>
-        <p>
-          Select a note or create a new one to start editing.
+      <div
+        className="placeholder"
+        style={{ padding: "32px", textAlign: "center", color: "#64748b" }}
+      >
+        <p>Select a note or create a new one to start editing.</p>
+        <p style={{ fontSize: "16px", opacity: 0.7 }}>
+          Your notes are stored privately in your browser.
         </p>
-        <p style={{ fontSize: '16px', opacity: 0.7 }}>Your notes are stored privately in your browser.</p>
       </div>
     );
   }
@@ -199,9 +198,9 @@ function NoteEditor({
 
 // PUBLIC_INTERFACE
 function App() {
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState("light");
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
   // Notes logic
@@ -210,19 +209,19 @@ function App() {
 
   // List/selection state
   const [selectedId, setSelectedId] = useState(null);
-  const [titleDraft, setTitleDraft] = useState('');
-  const [contentDraft, setContentDraft] = useState('');
+  const [titleDraft, setTitleDraft] = useState("");
+  const [contentDraft, setContentDraft] = useState("");
 
   // Search state
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
 
   // Filter notes: search across titles/content
   const filteredNotes = React.useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return notes;
     return notes.filter((n) => {
-      const t = (n.title || '').toLowerCase();
-      const c = (n.content || '').toLowerCase();
+      const t = (n.title || "").toLowerCase();
+      const c = (n.content || "").toLowerCase();
       return t.includes(q) || c.includes(q);
     });
   }, [notes, query]);
@@ -242,8 +241,8 @@ function App() {
   const handleSelectNote = (id) => {
     setSelectedId(id);
     const n = notes.find((x) => x.id === id);
-    setTitleDraft(n?.title || '');
-    setContentDraft(n?.content || '');
+    setTitleDraft(n?.title || "");
+    setContentDraft(n?.content || "");
   };
 
   // Create a new note
@@ -259,8 +258,8 @@ function App() {
     deleteNote(id);
     if (selectedId === id) {
       setSelectedId(filteredNotes[0]?.id || null);
-      setTitleDraft(filteredNotes[0]?.title || '');
-      setContentDraft(filteredNotes[0]?.content || '');
+      setTitleDraft(filteredNotes[0]?.title || "");
+      setContentDraft(filteredNotes[0]?.content || "");
     }
   };
 
@@ -270,7 +269,8 @@ function App() {
     updateNote(selectedId, { title: titleDraft, content: contentDraft });
   };
 
-  const handleToggleTheme = () => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+  const handleToggleTheme = () =>
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
 
   // The selected note (might not be in filtered if search hides it)
   const selected = notes.find((n) => n.id === selectedId) || null;
