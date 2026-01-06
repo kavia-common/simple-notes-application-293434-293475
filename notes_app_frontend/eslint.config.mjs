@@ -3,12 +3,12 @@ import pluginReact from "eslint-plugin-react";
 
 export default [
   { files: ["**/*.{js,mjs,cjs,jsx}"] },
-  { 
-    languageOptions: { 
+  {
+    languageOptions: {
       parserOptions: {
         ecmaVersion: "latest",
         sourceType: "module",
-        ecmaFeatures: { jsx: true }
+        ecmaFeatures: { jsx: true },
       },
       globals: {
         // Browser environment globals
@@ -16,6 +16,11 @@ export default [
         window: true,
         localStorage: true,
         crypto: true,
+        console: true,
+
+        // Node globals used by bundlers / CRA
+        process: true,
+
         // Test environment globals
         test: true,
         expect: true,
@@ -23,13 +28,13 @@ export default [
         describe: true,
         it: true,
         beforeEach: true,
-        afterEach: true
-      }
+        afterEach: true,
+      },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: 'React|App' }],
-      'no-empty': ['error', { 'allowEmptyCatch': false }]
-    }
+      "no-unused-vars": ["error", { varsIgnorePattern: "React|App" }],
+      "no-empty": ["error", { allowEmptyCatch: false }],
+    },
   },
   pluginJs.configs.recommended,
   {
@@ -38,7 +43,7 @@ export default [
       "react/react-in-jsx-scope": "off",
       "react/jsx-uses-react": "off",
       "react/jsx-uses-vars": "error",
-      "react/prop-types": "off"
-    }
-  }
-]
+      "react/prop-types": "off",
+    },
+  },
+];
